@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hacker Cipher Terminal</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <audio autoplay loop>
+    <source src="/static/hacker-loop.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <div class="terminal-container glitch-flicker" id="highlightBox">
+    <div class="terminal-header">
+      <span class="circle red"></span>
+      <span class="circle yellow"></span>
+      <span class="circle green"></span>
+      <span class="title" id="title"></span>
+    </div>
+    <div class="terminal-body">
+      <label for="message">Message:</label>
+      <textarea id="message" rows="4" placeholder="Type your secret message..."></textarea>
+
+      <label for="key">Key:</label>
+      <input type="number" id="key" placeholder="Enter key (e.g. 3)" />
+
+      <label for="action">Action:</label>
+      <select id="action" required>
+        <option value="" disabled selected hidden>Select the Action...</option>
+        <option value="encrypt">Encrypt</option>
+        <option value="decrypt">Decrypt</option>
+      </select>
+
+      <button onclick="process()">Execute</button>
+
+      <div class="result-container" id="resultContainer" hidden>
+        <h2 class="result-heading">>> Result</h2>
+        <p id="resultLabel">The result is:</p>
+        <div class="result" id="result"></div>
+        <button class="copy-btn" onclick="copyResult()">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function shiftCharEncrypt(char, key) {
+      if (char >= 'A' && char <= 'Z') {
+        return String.fromCharCode((char.charCodeAt(0) - 65 + key) % 26 + 65);
+      } else if (char >= 'a' && char <= 'z') {
+        return String.fromCharCode((char.charCodeAt(0) - 97 + key) % 26 + 97);
+      } else {
+        let temp = char.charCodeAt(0) + key;
+        if ((temp >= 65 && temp <= 90) || (temp >= 97 && temp <= 122)) {
+          temp += 26;
+        }
+        return String.fromCharCode(temp);
+      }
+    }
+
+    function shiftCharDecrypt(char, key) {
+      if (char >= 'A' && char <= 'Z') {
+        return String.fromCharCode((char.charCodeAt(0) - 65 - key + 26) % 26 + 65);
+      } else if (char >= 'a' && char <= 'z') {
+        return String.fromCharCode((char.charCodeAt(0) - 97 - key + 26) % 26 + 97);
+      } else {
+        let temp = char.charCodeAt(0) - key;
+        if ((temp >= 65 && temp <= 90) || (temp >= 97 && temp <= 122)) {
+          temp -= 26;
+        }
+        return String.fromCharCode(temp);
+      }
+    }
+
+    function process() {
+      const message = document.getElementById("message").value;
+      const keyInput = document.getElementById("key").value;
+      const action = document.getElementById("action").value;
+      const resultDiv = document.getElementById("result");
+      const resultContainer = document.getElementById("resultContainer");
+
+      if (!message.trim() || keyInput === "" || action === "") {
+        resultDiv.innerText = "Please fill in all fields.";
+        resultContainer.hidden = false;
+        return;
+      }
+
+      const key = parseInt(keyInput) % 26;
+      let result = '';
+
+      for (let char of message) {
+        result += (action === "encrypt")
+          ? shiftCharEncrypt(char, key)
+          : shiftCharDecrypt(char, key);
+      }
+
+      document.getElementById("resultLabel").innerText = 
+        action === "encrypt" ? "The encrypted message is: " : "The decrypted message is: ";
+      resultDiv.innerText = result;
+
+      resultContainer.hidden = false;
+      resultContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyResult() {
+      const text = document.getElementById("result").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Result copied to clipboard.");
+      });
+    }
+
+    // Typewriter Effect
+    const title = document.getElementById("title");
+    const fullText = "HACKER MODE - Shift Cipher";
+    let index = 0;
+    function typeWriter() {
+      if (index < fullText.length) {
+        title.textContent += fullText.charAt(index);
+        index++;
+        setTimeout(typeWriter, 75);
+      }
+    }
+    window.onload = () => {
+    typeWriter();
+    // Add glitter particles
+    for (let i = 0; i < 80; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.classList.add('glitter');
+      sparkle.style.top = `${Math.random() * 100}vh`;
+      sparkle.style.left = `${Math.random() * 100}vw`;
+      sparkle.style.animationDelay = `${Math.random() * 5}s`;
+      sparkle.style.opacity = Math.random();
+      document.body.appendChild(sparkle);
+    }
+  };
+  </script>
+</body>
+</html>
